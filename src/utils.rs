@@ -97,7 +97,7 @@ impl fmt::Display for SysInfo {
     }
 }
 
-const WAIT_FOR_TX_TIMEOUT: Duration = Duration::from_secs(30);
+const WAIT_FOR_TX_TIMEOUT: Duration = Duration::from_secs(61);
 const WAIT_FOR_TX_SLEEP: Duration = Duration::from_secs(2);
 
 pub async fn wait_for_tx(
