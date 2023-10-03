@@ -1,0 +1,83 @@
+---
+name: Task - Build binaries and publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag_name:
+        description: "Release tag name"
+        type: string
+        required: true
+  workflow_call:
+    inputs:
+      release_tag_name:
+        description: "Release tag name"
+        type: string
+        required: true
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+          - aarch64-apple-darwin
+          - aarch64-unknown-linux-gnu
+          - x86_64-apple-darwin
+          - x86_64-unknown-linux-gnu
+          - x86_64-pc-windows-gnu
+          - x86_64-pc-windows-msvc
+        include:
+          - build: aarch64-apple-darwin
+            os: macos-latest
+            bin_name: gatling
+          - build: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+            bin_name: gatling
+          - build: x86_64-apple-darwin
+            os: macos-latest
+            bin_name: gatling
+          - build: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            bin_name: gatling
+          - build: x86_64-pc-windows-gnu
+            os: windows-latest
+            bin_name: gatling.exe
+          - build: x86_64-pc-windows-msvc
+            os: windows-latest
+            bin_name: gatling.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup rust toolchain
+        run: |
+          rustup target add ${{ matrix.build }}
+
+      - name: Setup build deps (aarch64-unknown-linux-gnu)
+        if: matrix.build == 'aarch64-unknown-linux-gnu'
+        run: |
+          sudo apt update
+          sudo apt install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross
+
+      - name: Build binaries
+        if: matrix.build != 'aarch64-unknown-linux-gnu'
+        run: cargo build --release --target ${{ matrix.build }}
+
+      - name: Build (aarch64-unknown-linux-gnu)
+        if: matrix.build == 'aarch64-unknown-linux-gnu'
+        run: |
+          export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=/usr/bin/aarch64-linux-gnu-gcc
+          export CC_aarch64_unknown_linux_gnu=/usr/bin/aarch64-linux-gnu-gcc
+          export CXX_aarch64_unknown_linux_gnu=/usr/bin/aarch64-linux-gnu-g++
+          cargo build --release --target ${{ matrix.build }}
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: target/${{ matrix.build }}/release/${{ matrix.bin_name }}
+          asset_name: ${{ matrix.build}}-${{ matrix.bin_name }}
+          tag: ${{ inputs.release_tag_name }}
+          overwrite: true

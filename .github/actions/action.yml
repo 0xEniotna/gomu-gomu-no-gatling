@@ -1,16 +1,18 @@
-name: 'Gomu Gomu no Gatling'
-description: 'Run Gomu Gomu no Gatling to benchmark Starknet Sequencers'
+name: "Gomu Gomu no Gatling"
+description: "Run Gomu Gomu no Gatling to benchmark Starknet Sequencers"
 branding:
-  icon: 'activity-circle'
-  color: 'orange'
+  icon: "activity-circle"
+  color: "orange"
 inputs:
   config_path:
-    description: 'Path to the configuration file'
+    description: "Path to the configuration file"
     required: true
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
-    - run: cargo build --release
+    - run: wget https://github.com/keep-starknet-strange/gomu-gomu-no-gatling/releases/download/v0.0.2-1-alpha/x86_64-unknown-linux-gnu-gatling -O gatling
       shell: bash
-    - run: ./target/release/gatling shoot --c ${{ inputs.config_path }}
+    - run: chmod +x gatling
+      shell: bash
+    - run: RUST_LOG=info ./gatling shoot -c ${{ inputs.config_path }}
       shell: bash
