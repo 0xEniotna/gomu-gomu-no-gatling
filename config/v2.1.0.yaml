@@ -21,8 +21,10 @@ setup:
   num_accounts: 3
 
 run:
-  num_erc20_transfers: 5
-  num_erc721_mints: 5
+  num_erc20_transfers: 10
+  num_erc721_mints: 11
+  num_erc721_mints_to_single_addr: 0
+  num_erc721_transfers: 0
 
 report:
   num_blocks: 3
