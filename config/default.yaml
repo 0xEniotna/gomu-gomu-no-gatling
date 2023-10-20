@@ -15,11 +15,11 @@ setup:
   num_accounts: 3
 
 run:
-  num_erc20_transfers: 1200
-  num_erc721_mints: 1200
+  num_erc20_transfers: 200
+  num_erc721_mints: 200
 
 report:
-  num_blocks: 4
+  num_blocks: 10
   reports_dir: "reports"
 
 deployer:
